@@ -63,3 +63,63 @@ spaces = spaces.len();  // error: expected `&str`, found `usize`
 ```
 
 ## Data Types
+
+### Scalar Type
+
+A scalar type represents a single value. Rust has four primary scalar types: `integers`, `floating-point numbers`, `Booleans`, and `characters`. 
+
+```rust
+8-bit	i8	u8
+16-bit	i16	u16
+32-bit	i32	u32
+64-bit	i64	u64
+128-bit	i128	u128
+arch	isize	usize
+```
+
+the `isize` and `usize` types depend on the kind of computer your program is running on: 64 bits if you’re on a 64-bit architecture and 32 bits if you’re on a 32-bit architecture.
+
+#### Integer Overflow
+
+To explicitly handle the possibility of overflow, you can use these families of methods that the standard library provides on primitive numeric types:
+
+- Wrap in all modes with the wrapping_* methods, such as wrapping_add
+- Return the None value if there is overflow with the checked_* methods
+- Return the value and a boolean indicating whether there was overflow with the overflowing_* methods
+- Saturate at the value’s minimum or maximum values with saturating_* methods
+
+`floating-point numbers`, which are numbers with decimal points. Rust’s floating-point types are f32 and f64, which are 32 bits and 64 bits in size.
+
+### Compound Type
+
+Compound types can group multiple values into one type. Rust has two primitive compound types: tuples and arrays.
+
+```rust
+// Tuple
+fn main() {
+    let tup: (i32, f64, u8) = (500, 6.4, 1); 
+
+    // The variable tup binds to the entire tuple, because a tuple is considered a single compound element. To get the individual values out of a tuple, we can use pattern matching to destructure a tuple value
+    let (x, y, z) = tup;
+    
+    println!("The value of y is : {}", y);
+
+    // Or can access a tuple element directly by using a period(.)
+    let five_h = tup.0;
+    let six_f = tup.1;
+    let one = tup.2;
+}
+```
+
+```rust
+// Array
+fn main() {
+    let a1 = [1, 2, 3, 4, 5];
+
+    let a2: [i32; 5] = [1, 2, 3, 4, 5];
+
+    let a3 = [3; 5]; // initial value ; length
+}
+```
+
+## Function
