@@ -1,5 +1,23 @@
 # Common Concepts
 
+- [Common Concepts](#common-concepts)
+  - [Variables & Mutability](#variables--mutability)
+    - [Variables & Constants](#variables--constants)
+    - [Shadowing](#shadowing)
+  - [Data Types](#data-types)
+    - [Scalar Type](#scalar-type)
+      - [Integer Overflow](#integer-overflow)
+    - [Compound Type](#compound-type)
+  - [Function](#function)
+    - [Statements & Expressions](#statements--expressions)
+    - [Functions with Return](#functions-with-return)
+  - [Comments](#comments)
+  - [Control Flow](#control-flow)
+    - [if](#if)
+    - [Repetition with loop](#repetition-with-loop)
+      - [loop](#loop)
+      - [Looping through a collection with for](#looping-through-a-collection-with-for)
+
 ## Variables & Mutability
 
 **By default variables are immutable.** This is one of many nudges Rust gives you to write your code in a way that takes advantage of the safety and easy concurrency that Rust offers. 
@@ -123,3 +141,185 @@ fn main() {
 ```
 
 ## Function
+
+Rust code uses snake case as the conventional style for function and variable names. In snake case, all letters are lowercase and underscores separate words.
+
+```rust
+// function with parameters
+fn function(x: i32) {                       
+    println!("The value of x is {}", x);
+}
+
+// separate the parameter declarations with commas
+fn print_labeled_measurement(value: i32, unit_label: char) {
+    println!("The measurement is: {}{}", value, unit_label);
+}
+```
+
+### Statements & Expressions
+
+```rust
+fn main() {
+    let x = (let y = 6);    // ERROR: Rust不支持这类写法的连续赋值，let是一个声明，没有返回值
+}
+
+fn main() {
+    let y = {
+        let x = 3;
+        x + 1               // y==4, 注意这里没有分号
+    };
+
+    println!("The value of y is: {}", y);
+}
+```
+
+### Functions with Return
+
+Functions can return values to the code that calls them. We don’t name return values, but we do declare their type after an arrow (->). In Rust, the return value of the function is synonymous with the value of the final expression in the block of the body of a function. You can return early from a function by using the return keyword and specifying a value.
+
+```rust
+fn five() -> i32 {
+    5
+}
+
+// another example
+fn plus_one(x: i32) -> i32 {
+    x + 1
+}
+
+fn main() {
+    let x = five();
+
+    println!("The value of x is {}", x);
+}
+```
+
+## Comments
+
+use `//`
+
+## Control Flow
+
+### if
+
+```rust
+// if 
+fn main() {
+    let number = 6;
+
+    if number % 4 == 0 {                        // normal if 
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+
+    let condition = true;
+    let number = if condition {5} else {6};     // if in let statement
+}
+
+```
+
+### Repetition with loop
+
+Rust has three kinds of loops: `loop`, `while`, and `for`. Let’s try each one.
+
+#### loop
+
+```rust
+fn main() {
+    let mut count = 0;
+    'counting_up: loop {                            // The outer loop has the label 'counting_up, and it will count up from 0 to 2
+        println!("count = {}", count);
+        let mut remaining = 10;
+
+        loop {                                      // The inner loop without a label counts down from 10 to 9. 
+            println!("remaining = {}", remaining);
+            if remaining == 9 {
+                break;                              // The first break that doesn’t specify a label will exit the inner loop
+            }
+            if count == 2 {
+                break 'counting_up;                 //  The break 'counting_up; statement will exit the outer loop.
+            }
+            remaining -= 1;
+        }
+
+        count += 1;
+    }
+    println!("End count = {}", count);
+}
+
+// count = 0
+// remaining = 10
+// remaining = 9
+// count = 1
+// remaining = 10
+// remaining = 9
+// count = 2
+// remaining = 10
+// End count = 2
+```
+
+```rust
+// loop and return value
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+
+    println!("The result is {}", result);
+}
+
+// result = 20
+````
+
+#### while
+
+```rust
+fn main() {
+    let mut number = 3;
+
+    while number != 0 {
+        println!("{}!", number);
+
+        number -= 1;
+    }
+
+    println!("LIFTOFF!!!");
+}
+```
+
+#### Looping through a collection with for
+
+```rust
+// Ugly way to do it
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+    let mut index = 0;
+
+    while index < 5 {
+        println!("the value is: {}", a[index]);
+
+        index += 1;
+    }
+}
+
+// Much more better
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+
+    for element in a {
+        println!("the value is: {}", element);
+    }
+}
+
+```
