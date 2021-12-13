@@ -1,5 +1,16 @@
 # Struct
 
+- [Struct](#struct)
+  - [Defining & Instantiating](#defining--instantiating)
+    - [Using Typle Structs without Named Fields to Create Different Types](#using-typle-structs-without-named-fields-to-create-different-types)
+    - [Unit-like Structs Without Any Fields](#unit-like-structs-without-any-fields)
+  - [Example](#example)
+    - [Debug](#debug)
+  - [Method](#method)
+    - [Defining Methods](#defining-methods)
+    - [Methods with More Parameters](#methods-with-more-parameters)
+    - [Assocaited Functions](#assocaited-functions)
+
 ## Defining & Instantiating
 
 ```rust
@@ -189,9 +200,13 @@ struct Rectangle {
     height: u32,
 }
 
-impl Rectangle {
-    fn area(&self) -> u32 {
+impl Rectangle {                // Everything within this impl block will be associated with the Rectangle type.
+    fn area(&self) -> u32 {     // The &self is actually short for self: &Self
         self.width * self.height
+    }
+
+    fn width(&self) -> bool {   // can choose to give a method the same name as one of the struct’s fields
+        self.width > 0
     }
 }
 
@@ -205,5 +220,38 @@ fn main() {
         "The area of the rectangle is {} square pixels.",
         rect1.area()
     );
+
+    if rect1.width() {  // with parentheses, Rust knows we mean the method width. 
+        println!("The rectangle has a nonzero width; it is {}", rect1.width);   // When we don’t use parentheses, Rust knows we mean the field width
+    }
 }
 ```
+
+**Here’s how it works: when you call a method with object.something(), Rust automatically adds in &, &mut, or * so object matches the signature of the method.**
+
+### Methods with More Parameters
+
+```rust
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+```
+
+### Assocaited Functions
+
+Associated functions that aren’t methods are often used for constructors that will return a new instance of the struct. 
+
+```rust
+impl Rectangle {
+    fn square(size: u32) -> Rectangle {
+        Rectangle {
+            width: size,
+            height: size,
+        }
+    }
+}
+```
+
+**Each struct is allowed to have multiple impl blocks.**

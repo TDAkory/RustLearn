@@ -2,6 +2,26 @@
 
 > Ownership is Rust’s most unique feature, and it enables Rust to make memory safety guarantees without needing a garbage collector.
 
+- [Ownership](#ownership)
+  - [Ownership rules](#ownership-rules)
+    - [Scope](#scope)
+    - [String](#string)
+    - [Memory & Allocation](#memory--allocation)
+      - [Ways Variables and Data Interact: Move](#ways-variables-and-data-interact-move)
+      - [Ways Variables and Data Interact: Clone](#ways-variables-and-data-interact-clone)
+      - [Stack Only Data: Copy](#stack-only-data-copy)
+    - [Ownership & Functions](#ownership--functions)
+    - [Return Value and Scope](#return-value-and-scope)
+  - [References and Borrowing](#references-and-borrowing)
+    - [Mutable Reference](#mutable-reference)
+    - [Dangling Reference](#dangling-reference)
+  - [Slice](#slice)
+    - [String Slices](#string-slices)
+      - [String Literals Are Slices](#string-literals-are-slices)
+      - [String Slices as Parameters](#string-slices-as-parameters)
+    - [Other Slices](#other-slices)
+  - [Summary](#summary)
+
 ## Ownership rules
 
 - Each value in Rust has a variable that’s called its owner.

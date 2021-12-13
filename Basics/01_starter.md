@@ -1,5 +1,10 @@
 # Starter
 
+- [Starter](#starter)
+  - [Installation](#installation)
+  - [New Project](#new-project)
+  - [Summary](#summary)
+
 ## Installation
 
 We’ll download Rust through `rustup`, a command line tool for managing Rust versions and associated tools.
