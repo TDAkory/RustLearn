@@ -107,7 +107,7 @@ When you see a call to clone, you know that some arbitrary code is being execute
 
 The reason is that types such as integers that have a known size at compile time are stored entirely on the stack, so copies of the actual values are quick to make. 
 
-Rust has a special annotation called the `Copy trait` that we can place on types like integers that are stored on the stack 
+Rust has a special annotation called the `Copy trait` that we can place on types like integers that are stored on the stack.
 
 ### Ownership & Functions
 
