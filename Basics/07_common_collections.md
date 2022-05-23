@@ -78,5 +78,29 @@ Rust has only one string type in the core language, which is the string slice `s
 The `String` type, which is provided by Rust’s standard library rather than coded into the core language, is a growable, mutable, owned, UTF-8 encoded string type.
 
 ```rust
-let mut s = String::new();      // Create a new String
+    let mut s = String::new();      // Create a new String
+
+//////////////////////////////////////////////////
+    let data = "initial contents";
+    //to_string method, which is available on any type that implements the Display trait
+    let s = data.to_string();
+    // the method also works on a literal directly:
+    let s = "initial contents".to_string();
+    // String::from to create a String from a string literal
+    let s = String::from("initial contents");
+
+//////////////////////////////////////////////////
+    let mut s = String::from("foo");
+    s.push_str("bar");  // append a string slice, foobar
+    s.push('l');     // append a letter, foobarl
+
+    let s1 = String::from("Hello, ");
+    let s2 = String::from("world!");
+    let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
+
+    let s1 = String::from("tic");
+    let s2 = String::from("tac");
+    let s3 = String::from("toe");
+    // Use format!
+    let s = format!("{}-{}-{}", s1, s2, s3);
 ```

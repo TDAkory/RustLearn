@@ -52,7 +52,6 @@ mod front_of_house {
 }
 ```
 
-
 ## Better Understanding
 
 - [项目管理](https://wiki.jikexueyuan.com/project/rust-primer/cargo-projects-manager/cargo-projects-manager.html)
