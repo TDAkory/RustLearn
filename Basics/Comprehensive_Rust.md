@@ -43,6 +43,7 @@ This is a four day Rust course developed by the Android team. The course covers 
       - [Destructuring Arrays](#destructuring-arrays)
       - [Match Guards](#match-guards)
     - [Control Flow](#control-flow)
+      - [Blocks](#blocks)
 
 
 ## Day 1
@@ -889,3 +890,27 @@ fn main() {
 * The condition defined in the guard applies to every expression in a pattern with an |.
 
 ### Control Flow
+
+#### Blocks
+
+A block in Rust has a value and a type: the value is the last expression of the block. The same rule is used for functions: the value of the function body is the return value. However if the last expression ends with ;, then the resulting value and type is ().
+
+```rust
+fn main() {
+    let x = {
+        let y = 10;
+        println!("y: {y}");
+        let z = {
+            let w = {
+                3 + 4
+            };
+            println!("w: {w}");
+            y * w
+        };
+        println!("z: {z}");
+        z - y
+    };
+    println!("x: {x}");
+}
+```
+
