@@ -44,6 +44,9 @@ This is a four day Rust course developed by the Android team. The course covers 
       - [Match Guards](#match-guards)
     - [Control Flow](#control-flow)
       - [Blocks](#blocks)
+      - [if expressions](#if-expressions)
+      - [if let expressions](#if-let-expressions)
+      - [while expressions](#while-expressions)
 
 
 ## Day 1
@@ -914,3 +917,55 @@ fn main() {
 }
 ```
 
+#### if expressions
+
+```rust
+fn main() {
+    let mut x = 10;
+    if x % 2 == 0 {
+        x = x / 2;
+    } else {
+        x = 3 * x + 1;
+    }
+}
+
+fn main() {
+    let mut x = 10;
+    x = if x % 2 == 0 {
+        x / 2
+    } else {
+        3 * x + 1
+    };
+}
+```
+
+#### if let expressions
+
+`if let` can be more concise than `match`, e.g., when only one case is interesting. In contrast, `match` requires all branches to be covered.
+
+```rust
+fn main() {
+    let arg = std::env::args().next();
+    if let Some(value) = arg {
+        println!("Program name: {value}");
+    } else {
+        println!("Missing name?");
+    }
+}
+```
+
+#### while expressions
+
+```rust
+fn main() {
+    let mut x = 10;
+    while x != 1 {
+        x = if x % 2 == 0 {
+            x / 2
+        } else {
+            3 * x + 1
+        };
+    }
+    println!("Final x: {x}");
+}
+```
