@@ -47,6 +47,8 @@ This is a four day Rust course developed by the Android team. The course covers 
       - [if expressions](#if-expressions)
       - [if let expressions](#if-let-expressions)
       - [while expressions](#while-expressions)
+      - [while let expressions](#while-let-expressions)
+      - [for expressions](#for-expressions)
 
 
 ## Day 1
@@ -967,5 +969,34 @@ fn main() {
         };
     }
     println!("Final x: {x}");
+}
+```
+
+#### while let expressions
+
+```rust
+fn main() {
+    let v = vec![10, 20, 30];
+    let mut iter = v.into_iter();
+
+    while let Some(x) = iter.next() {
+        println!("x: {x}");
+    }
+}
+```
+
+#### for expressions
+
+```rust
+fn main() {
+    let v = vec![10, 20, 30];
+
+    for x in v {
+        println!("x: {x}");
+    }
+    
+    for i in (0..10).step_by(2) {
+        println!("i: {i}");
+    }
 }
 ```
