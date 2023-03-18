@@ -44,11 +44,15 @@ This is a four day Rust course developed by the Android team. The course covers 
       - [Match Guards](#match-guards)
     - [Control Flow](#control-flow)
       - [Blocks](#blocks)
-      - [if expressions](#if-expressions)
-      - [if let expressions](#if-let-expressions)
-      - [while expressions](#while-expressions)
-      - [while let expressions](#while-let-expressions)
-      - [for expressions](#for-expressions)
+      - [`if` expressions](#if-expressions)
+      - [`if let` expressions](#if-let-expressions)
+      - [`while` expressions](#while-expressions)
+      - [`while let` expressions](#while-let-expressions)
+      - [`for` expressions](#for-expressions)
+      - [`loop` expressions](#loop-expressions)
+      - [`match` expression](#match-expression)
+      - [break and continue](#break-and-continue)
+    - [Standart Library](#standart-library)
 
 
 ## Day 1
@@ -919,7 +923,7 @@ fn main() {
 }
 ```
 
-#### if expressions
+#### `if` expressions
 
 ```rust
 fn main() {
@@ -941,7 +945,7 @@ fn main() {
 }
 ```
 
-#### if let expressions
+#### `if let` expressions
 
 `if let` can be more concise than `match`, e.g., when only one case is interesting. In contrast, `match` requires all branches to be covered.
 
@@ -956,7 +960,7 @@ fn main() {
 }
 ```
 
-#### while expressions
+#### `while` expressions
 
 ```rust
 fn main() {
@@ -972,7 +976,7 @@ fn main() {
 }
 ```
 
-#### while let expressions
+#### `while let` expressions
 
 ```rust
 fn main() {
@@ -985,7 +989,7 @@ fn main() {
 }
 ```
 
-#### for expressions
+#### `for` expressions
 
 ```rust
 fn main() {
@@ -1000,3 +1004,81 @@ fn main() {
     }
 }
 ```
+
+* Index iteration is not a special syntax in Rust for just that case.
+* `(0..10)` is a range that implements an `Iterator` trait.
+* `step_by` is a method that returns another `Iterator` that skips every other element.
+
+#### `loop` expressions
+
+```rust
+fn main() {
+    let mut x = 10;
+    loop {
+        x = if x % 2 == 0 {
+            x / 2
+        } else {
+            3 * x +1
+        };
+        if x == 1 {
+            break;
+        }
+    }
+    println!("Final x: {x}");
+}
+```
+
+#### `match` expression
+
+```rust
+fn main() {
+    match std::env::args().next().as_deref() {
+        Some("cat") => println!("Will do cat things"),
+        Some("ls")  => println!("Will ls some files"),
+        Some("mv")  => println!("Let's move some files"),
+        Some("rm")  => println!("Uh, dangerous!"),
+        None        => println!("Hmm, no program name?"),
+        _           => println!("Unknown program name!"),
+    }
+}
+```
+
+* `std::env::args().next()` returns an `Option<String>`, but we cannot match against String.
+* `as_deref()` transforms an `Option<T>` to `Option<&T::Target>`. In our case, this turns `Option<String>` into `Option<&str>`.
+* We can now use pattern matching to match against the &str inside Option.
+
+#### break and continue
+
+Both continue and break can optionally take a label argument which is used to break out of nested loops:
+
+```rust
+fn main() {
+    let v = vec![10, 20, 30];
+    let mut iter = v.into_iter();
+    'outer: while let Some(x) = iter.next() {
+        println!("x: {x}");
+        let mut i = 0;
+        while i < x {
+            println!("x: {x}, i: {i}");
+            i += 1;
+            if i == 3 {
+                break 'outer;
+            }
+        }
+    }
+}
+```
+
+### Standart Library
+
+* `Option` and `Result` types: used for optional values and error handling.
+* `String`: the default string type used for owned data.
+* `Vec`: a standard extensible vector.
+* `HashMap`: a hash map type with a configurable hashing algorithm.
+* `Box`: an owned pointer for heap-allocated data.
+* `Rc`: a shared reference-counted pointer for heap-allocated data.
+
+* In fact, Rust contains several layers of the Standard Library: `core`, `alloc` and `std`.
+* `core` includes the most basic types and functions that don’t depend on `libc`, allocator or even the presence of an operating system.
+* `alloc` includes types which require a global heap allocator, such as `Vec`, `Box` and `Arc`.
+* Embedded Rust applications often only use `core`, and sometimes `alloc`.
