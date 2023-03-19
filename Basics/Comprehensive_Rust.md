@@ -53,6 +53,18 @@ This is a four day Rust course developed by the Android team. The course covers 
       - [`match` expression](#match-expression)
       - [break and continue](#break-and-continue)
     - [Standart Library](#standart-library)
+  - [Day 3](#day-3)
+    - [Traits](#traits)
+      - [Deriving Traits](#deriving-traits)
+      - [Default Methods](#default-methods)
+      - [Important Traits](#important-traits)
+        - [Iterators](#iterators)
+        - [FromIterator](#fromiterator)
+        - [From and Into](#from-and-into)
+        - [Read and Write](#read-and-write)
+      - [Add Mul ......](#add-mul-)
+        - [Drop](#drop)
+        - [Default](#default)
 
 
 ## Day 1
@@ -1082,3 +1094,342 @@ fn main() {
 * `core` includes the most basic types and functions that don’t depend on `libc`, allocator or even the presence of an operating system.
 * `alloc` includes types which require a global heap allocator, such as `Vec`, `Box` and `Arc`.
 * Embedded Rust applications often only use `core`, and sometimes `alloc`.
+
+## Day 3
+
+### Traits
+
+Rust lets you abstract over types with traits. They’re similar to interfaces:
+
+```rust
+trait Greet {
+    fn say_hello(&self);
+}
+
+struct Dog {
+    name: String,
+}
+
+struct Cat;  // No name, cats won't respond to it anyway.
+
+impl Greet for Dog {
+    fn say_hello(&self) {
+        println!("Wuf, my name is {}!", self.name);
+    }
+}
+
+impl Greet for Cat {
+    fn say_hello(&self) {
+        println!("Miau!");
+    }
+}
+
+fn main() {
+    let pets: Vec<Box<dyn Greet>> = vec![
+        Box::new(Dog { name: String::from("Fido") }),
+        Box::new(Cat),
+    ];
+    for pet in pets {
+        pet.say_hello();
+    }
+    // 24 0
+    println!("{} {}", std::mem::size_of::<Dog>(), std::mem::size_of::<Cat>());
+    // 8 8
+    println!("{} {}", std::mem::size_of::<&Dog>(), std::mem::size_of::<&Cat>());
+    // 16
+    println!("{}", std::mem::size_of::<&dyn Greet>());
+    // 16
+    println!("{}", std::mem::size_of::<Box<dyn Greet>>());
+}
+```
+
+* Types that implement a given trait may be of different sizes. This makes it impossible to have things like `Vec<Greet>` in the example above.
+* `dyn Greet` is a way to tell the compiler about a dynamically sized type that implements Greet.
+
+#### Deriving Traits
+
+```rust
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+struct Player {
+    name: String,
+    strength: u8,
+    hit_points: u8,
+}
+
+fn main() {
+    let p1 = Player::default();
+    let p2 = p1.clone();
+    println!("Is {:?}\nequal to {:?}?\nThe answer is {}!", &p1, &p2,
+             if p1 == p2 { "yes" } else { "no" });
+}
+```
+
+#### Default Methods
+
+Traits can implement behavior in terms of other trait methods:
+
+```rust
+trait Equals {
+    fn equal(&self, other: &Self) -> bool;
+    fn not_equal(&self, other: &Self) -> bool {
+        !self.equal(other)
+    }
+}
+
+#[derive(Debug)]
+struct Centimeter(i16);
+
+impl Equals for Centimeter {
+    fn equal(&self, other: &Centimeter) -> bool {
+        self.0 == other.0
+    }
+}
+
+fn main() {
+    let a = Centimeter(10);
+    let b = Centimeter(20);
+    println!("{a:?} equals {b:?}: {}", a.equal(&b));
+    println!("{a:?} not_equals {b:?}: {}", a.not_equal(&b));
+}
+```
+
+#### Important Traits
+
+* `Iterator` and `IntoIterator` used in `for` loops,
+* `From` and `Into` used to convert values,
+* `Read` and `Write` used for IO,
+* `Add`, `Mul`, … used for operator overloading, and
+* `Drop` used for defining destructors.
+* `Default` used to construct a default instance of a type.
+
+##### Iterators
+
+implement the Iterator trait on your own types:
+
+```rust
+struct Fibonacci {
+    curr: u32,
+    next: u32,
+}
+
+impl Iterator for Fibonacci {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let new_next = self.curr + self.next;
+        self.curr = self.next;
+        self.next = new_next;
+        Some(self.curr)
+    }
+}
+```
+
+##### FromIterator
+
+lets you build a collection from an Iterator.
+
+```rust
+fn main() {
+    let primes = vec![2, 3, 5, 7];
+    let prime_squares = primes
+        .into_iter()
+        .map(|prime| prime * prime)
+        .collect::<Vec<_>>();
+}
+```
+
+`Iterator` implements `fn collect<B>(self) -> B where B: FromIterator<Self::Item>, Self: Sized`
+
+##### From and Into
+
+```rust
+fn main() {
+    let s = String::from("hello");
+    let addr = std::net::Ipv4Addr::from([127, 0, 0, 1]);
+    let one = i16::from(true);
+    let bigger = i32::from(123i16);
+    println!("{s}, {addr}, {one}, {bigger}");
+}
+```
+
+`Into` is automatically implemented when `From` is implemented:
+
+```rust
+fn main() {
+    let s: String = "hello".into();
+    let addr: std::net::Ipv4Addr = [127, 0, 0, 1].into();
+    let one: i16 = true.into();
+    let bigger: i32 = 123i16.into();
+    println!("{s}, {addr}, {one}, {bigger}");
+}
+```
+
+When declaring a function argument input type like “anything that can be converted into a String”, the rule is opposite, you should use `Into`. Your function will accept types that implement `From` and those that only implement `Into`.
+
+##### Read and Write
+
+Using Read and BufRead, you can abstract over `u8` sources, Similarly, Write lets you abstract over `u8` sinks:
+
+```rust
+use std::io::{BufRead, BufReader, Read, Result};
+
+fn count_lines<R: Read>(reader: R) -> usize {
+    let buf_reader = BufReader::new(reader);
+    buf_reader.lines().count()
+}
+
+fn main() -> Result<()> {
+    let slice: &[u8] = b"foo\nbar\nbaz\n";
+    println!("lines in slice: {}", count_lines(slice));
+
+    let file = std::fs::File::open(std::env::current_exe()?)?;
+    println!("lines in file: {}", count_lines(file));
+    Ok(())
+}
+```
+
+```rust
+use std::io::{Result, Write};
+
+fn log<W: Write>(writer: &mut W, msg: &str) -> Result<()> {
+    writer.write_all(msg.as_bytes())?;
+    writer.write_all("\n".as_bytes())
+}
+
+fn main() -> Result<()> {
+    let mut buffer = Vec::new();
+    log(&mut buffer, "Hello")?;
+    log(&mut buffer, "World")?;
+    println!("Logged: {:?}", buffer);
+    Ok(())
+}
+```
+
+#### Add Mul ......
+
+Operator overloading is implemented via traits in std::ops:
+
+```rust
+#[derive(Debug, Copy, Clone)]
+struct Point { x: i32, y: i32 }
+
+impl std::ops::Add for Point {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {x: self.x + other.x, y: self.y + other.y}
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 10, y: 20 };
+    let p2 = Point { x: 100, y: 200 };
+    println!("{:?} + {:?} = {:?}", p1, p2, p1 + p2);
+}
+```
+
+* You could implement Add for &Point. In which situations is that useful?
+  * Answer: Add:add consumes self. If type T for which you are overloading the operator is not Copy, you should consider overloading the operator for &T as well. This avoids unnecessary cloning on the call site.
+* Why is Output an associated type? Could it be made a type parameter?
+  * Short answer: Type parameters are controlled by the caller, but associated types (like Output) are controlled by the implementor of a trait.
+
+##### Drop
+
+Values which implement Drop can specify code to run when they go out of scope:
+
+```rust
+struct Droppable {
+    name: &'static str,
+}
+
+impl Drop for Droppable {
+    fn drop(&mut self) {
+        println!("Dropping {}", self.name);
+    }
+}
+
+fn main() {
+    let a = Droppable { name: "a" };
+    {
+        let b = Droppable { name: "b" };
+        {
+            let c = Droppable { name: "c" };
+            let d = Droppable { name: "d" };
+            println!("Exiting block B");
+        }
+        println!("Exiting block A");
+    }
+    a.drop();
+    println!("Exiting main");
+}
+```
+
+* Why doesn’t Drop::drop take self?
+  * Short-answer: If it did, std::mem::drop would be called at the end of the block, resulting in another call to Drop::drop, and a stack overflow!
+
+##### Default
+
+Default trait provides a default implementation of a trait.
+
+```rust
+#[derive(Debug, Default)]
+struct Derived {
+    x: u32,
+    y: String,
+    z: Implemented,
+}
+
+#[derive(Debug)]
+struct Implemented(String);
+
+impl Default for Implemented {
+    fn default() -> Self {
+        Self("John Smith".into())
+    }
+}
+
+fn main() {
+    let default_struct: Derived = Default::default();
+    println!("{default_struct:#?}");
+
+    let almost_default_struct = Derived {
+        y: "Y is set!".into(),
+        ..Default::default()
+    };
+    println!("{almost_default_struct:#?}");
+
+    let nothing: Option<Derived> = None;
+    println!("{:#?}", nothing.unwrap_or_default());
+}
+```
+
+```shell
+Derived {
+    x: 0,
+    y: "",
+    z: Implemented(
+        "John Smith",
+    ),
+}
+Derived {
+    x: 0,
+    y: "Y is set!",
+    z: Implemented(
+        "John Smith",
+    ),
+}
+Derived {
+    x: 0,
+    y: "",
+    z: Implemented(
+        "John Smith",
+    ),
+}
+```
+
+* It can be implemented directly or it can be derived via #[derive(Default)].
+* Derived implementation will produce an instance where all fields are set to their default values.
+  * This means all types in the struct must implement Default too.
+* Standard Rust types often implement Default with reasonable values (e.g. 0, "", etc).
+* The partial struct copy works nicely with default.
+* Rust standard library is aware that types can implement Default and provides convenience methods that use it.
