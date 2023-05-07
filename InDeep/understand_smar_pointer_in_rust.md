@@ -6,6 +6,7 @@
       - [More Information About the Cons List](#more-information-about-the-cons-list)
       - [Computing the Size of a Non-Recursive Type](#computing-the-size-of-a-non-recursive-type)
   - [Treating Smart Pointers Like Regular References with the `Deref` Trait](#treating-smart-pointers-like-regular-references-with-the-deref-trait)
+    - [How Deref Coercion Interacts with Mutability](#how-deref-coercion-interacts-with-mutability)
 
 
 The most common kind of pointer in Rust is a reference, indicated by the `&` symbol and borrow the value they point to. while references only borrow data, in many cases, smart pointers own the data they point to.
@@ -67,3 +68,46 @@ enum Message {
 ```
 
 ## Treating Smart Pointers Like Regular References with the `Deref` Trait
+
+Implementing the Deref trait allows you to customize the behavior of the dereference operator `*`
+
+The Deref trait, provided by the standard library, requires us to implement one method named `deref` that borrows `self` and returns a reference to the inner data.
+
+```rust
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+fn hello(name: &str) {
+    println!("Hello, {name}!");
+}
+
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    hello(&m);  // &MyBox --> &String --> &str
+}
+```
+
+### How Deref Coercion Interacts with Mutability
+
+Similar to how you use the `Deref` trait to override the `*` operator on immutable references, you can use the `DerefMut` trait to override the `*` operator on mutable references.
+
+Rust does **deref coercion** when it finds types and trait implementations in three cases:
+
+* From &T to &U when T: Deref<Target=U>
+* From &mut T to &mut U when T: DerefMut<Target=U>
+* From &mut T to &U when T: Deref<Target=U>
