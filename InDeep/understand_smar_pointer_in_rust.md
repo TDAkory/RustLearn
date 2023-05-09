@@ -7,6 +7,9 @@
       - [Computing the Size of a Non-Recursive Type](#computing-the-size-of-a-non-recursive-type)
   - [Treating Smart Pointers Like Regular References with the `Deref` Trait](#treating-smart-pointers-like-regular-references-with-the-deref-trait)
     - [How Deref Coercion Interacts with Mutability](#how-deref-coercion-interacts-with-mutability)
+  - [Running Code on Cleanup with the Drop Trait](#running-code-on-cleanup-with-the-drop-trait)
+    - [Dropping a Value Early with std::mem::drop](#dropping-a-value-early-with-stdmemdrop)
+  - [Rc, the Reference Counted Smart Pointer](#rc-the-reference-counted-smart-pointer)
 
 
 The most common kind of pointer in Rust is a reference, indicated by the `&` symbol and borrow the value they point to. while references only borrow data, in many cases, smart pointers own the data they point to.
@@ -111,3 +114,58 @@ Rust does **deref coercion** when it finds types and trait implementations in th
 * From &T to &U when T: Deref<Target=U>
 * From &mut T to &mut U when T: DerefMut<Target=U>
 * From &mut T to &U when T: Deref<Target=U>
+
+## Running Code on Cleanup with the Drop Trait
+
+The second trait important to the smart pointer pattern is Drop, which lets you customize what happens when a value is about to go out of scope. 
+
+The Drop trait requires you to implement one method named drop that takes a mutable reference to self.
+
+```rust
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+    println!("CustomSmartPointers created.");
+}
+
+// CustomSmartPointers created.
+// Dropping CustomSmartPointer with data `other stuff`!
+// Dropping CustomSmartPointer with data `my stuff`!
+```
+
+### Dropping a Value Early with std::mem::drop
+
+Rust doesn’t let you call the Drop trait’s drop method manually; instead you have to call the std::mem::drop function provided by the standard library if you want to force a value to be dropped before the end of its scope.
+
+```rust
+fn main() {
+    let c = CustomSmartPointer {
+        data: String::from("some data"),
+    };
+    println!("CustomSmartPointer created.");
+    drop(c);
+    println!("CustomSmartPointer dropped before the end of main.");
+}
+
+/*
+CustomSmartPointer created.
+Dropping CustomSmartPointer with data `some data`!
+CustomSmartPointer dropped before the end of main.
+*/
+```
+
+## Rc<T>, the Reference Counted Smart Pointer
