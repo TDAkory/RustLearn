@@ -1,5 +1,15 @@
 # Generic Types, Traits, Lifetime
 
+- [Generic Types, Traits, Lifetime](#generic-types-traits-lifetime)
+  - [Generic Types](#generic-types)
+  - [Traits](#traits)
+    - [Trait Bound Syntax](#trait-bound-syntax)
+    - [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
+  - [Validating References with Lifetimes](#validating-references-with-lifetimes)
+    - [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
+    - [The Static Lifetime](#the-static-lifetime)
+
+
 ## Generic Types
 
 > The generic Option<T> is replaced with the specific definitions created by the compiler. Because Rust compiles generic code into code that specifies the type in each instance, **we pay no runtime cost for using generics**.

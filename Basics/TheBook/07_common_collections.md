@@ -1,5 +1,11 @@
 # Collections
 
+- [Collections](#collections)
+  - [vector](#vector)
+  - [Storing UTF-8 Encoded Text with String](#storing-utf-8-encoded-text-with-string)
+  - [HashMap](#hashmap)
+
+
 ## vector
 
 ```rust

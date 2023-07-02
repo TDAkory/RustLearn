@@ -5,3 +5,6 @@
   
 - [rCore-Tutorial V3](https://rcore-os.github.io/rCore-Tutorial-deploy/)
 - [safe interop between Rust and C++](https://cxx.rs/index.html)
+
+- [陈天 Rust编程第一课](http://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E9%99%88%E5%A4%A9%20%C2%B7%20Rust%20%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%80%E8%AF%BE)
+- 

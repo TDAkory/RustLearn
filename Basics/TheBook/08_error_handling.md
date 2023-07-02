@@ -1,5 +1,16 @@
 # Error Handling
 
+- [Error Handling](#error-handling)
+  - [Panic!](#panic)
+    - [Backtrace](#backtrace)
+  - [Recoverable Errors with Result](#recoverable-errors-with-result)
+    - [Matching on Different Errors](#matching-on-different-errors)
+      - [Alternatives to Using match with Result\<T, E\>](#alternatives-to-using-match-with-resultt-e)
+    - [Shortcuts for Panic on Error: unwrap and expect](#shortcuts-for-panic-on-error-unwrap-and-expect)
+    - [Propagating Errors](#propagating-errors)
+      - [Shortcut: the ? Operator](#shortcut-the--operator)
+
+
 ## Panic!
 
 > By default, when a panic occurs, the program starts unwinding, which means Rust walks back up the stack and cleans up the data from each function it encounters. However, this walking back and cleanup is a lot of work. Rust, therefore, allows you to choose the alternative of immediately aborting, which ends the program without cleaning up, by adding panic = 'abort' to the appropriate [profile] sections in your Cargo.toml file. 
