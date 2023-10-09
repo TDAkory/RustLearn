@@ -139,6 +139,9 @@ pub trait Iterator {
 
 * iterator 本身需要是 mutable 的，但其获取的 Item 是 immutable references
   * `iter`、`into_iter`、`iter_mut`
+    * The iter method produces an iterator over immutable references.
+    * create an iterator that takes ownership of v1 and returns owned values, we can call into_iter instead of iter.
+    * iterate over mutable references, we can call iter_mut instead of iter.
   
 * iterator还实现了很多方法，这些方法通常会调用next方法，我们称之为 consuming adaptors
 
@@ -218,3 +221,7 @@ mod tests {
     }
 }
 ```
+
+## Summary
+
+Closures and iterators are Rust features inspired by functional programming language ideas. They contribute to Rust’s capability to clearly express high-level ideas at low-level performance. The implementations of closures and iterators are such that runtime performance is not affected. This is part of Rust’s goal to strive to provide zero-cost abstractions.
