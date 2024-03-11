@@ -9,3 +9,4 @@
 
 - [陈天 Rust编程第一课](http://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/%E9%99%88%E5%A4%A9%20%C2%B7%20Rust%20%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%80%E8%AF%BE)
 - [通过例子学Rust](https://rustwiki.org/zh-CN/rust-by-example/index.html)
+- [Rust By Practice](https://practice.course.rs/why-exercise.html)
