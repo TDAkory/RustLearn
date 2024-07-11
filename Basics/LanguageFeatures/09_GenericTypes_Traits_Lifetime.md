@@ -2,9 +2,12 @@
 
 - [Generic Types, Traits, Lifetime](#generic-types-traits-lifetime)
   - [Generic Types](#generic-types)
+    - [const generics(Rust 1.51)](#const-genericsrust-151)
   - [Traits](#traits)
     - [Trait Bound Syntax](#trait-bound-syntax)
     - [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
+    - [有条件的实现特征](#有条件的实现特征)
+    - [特征用于指定函数返回值](#特征用于指定函数返回值)
   - [Validating References with Lifetimes](#validating-references-with-lifetimes)
     - [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
     - [The Static Lifetime](#the-static-lifetime)
@@ -106,7 +109,60 @@ fn main() {
 }
 ```
 
+### const generics(Rust 1.51)
+
+简而言之，是针对数值的泛型
+
+```rust
+fn display_array<T: std::fmt::Debug, const N: usize>(arr: [T; N]) {
+    println!("{:?}", arr);
+}
+fn main() {
+    let arr: [i32; 3] = [1, 2, 3];
+    display_array(arr);
+
+    let arr: [i32; 2] = [1, 2];
+    display_array(arr);
+}
+```
+
+const generics expression 
+
+```rust
+fn something<T>(val: T)
+where
+    Assert<{ core::mem::size_of::<T>() < 768 }>: IsTrue,
+    //       ^-----------------------------^ 这里是一个 const 表达式，换成其它的 const 表达式也可以
+{
+    //
+}
+```
+
+目前，仅允许使用以下形式的 const 参数实例化模板参数：
+
+一个独立的 const 参数。
+一个字面量（即整数、布尔值或字符）。
+一个具体的常量表达式（用 {} 包围），不涉及任何通用参数。
+
+```rust
+fn foo<const N: usize>() {}
+
+fn bar<T, const M: usize>() {
+    foo::<M>(); // Okay: `M` is a const parameter
+    foo::<2021>(); // Okay: `2021` is a literal
+    foo::<{20 * 100 + 20 * 10 + 1}>(); // Okay: const expression contains no generic parameters
+    
+    foo::<{ M + 1 }>(); // Error: const expression contains the generic parameter `M`
+    foo::<{ std::mem::size_of::<T>() }>(); // Error: const expression contains the generic parameter `T`
+    
+    let _: [u8; M]; // Okay: `M` is a const parameter
+    let _: [u8; std::mem::size_of::<T>()]; // Error: const expression contains the generic parameter `T`
+}
+```
+
 ## Traits
+
+> concept & require in C++20
 
 > Traits are similar to a feature often called interfaces in other languages, although with some differences.
 
@@ -173,6 +229,25 @@ where
     T: Display + Clone,
     U: Clone + Debug,
 {}
+```
+
+### 有条件的实现特征
+
+```rust
+impl<T: Display> ToString for T {
+    // 未所有实现了Display的类型，实现ToString的trait
+}
+```
+
+### 特征用于指定函数返回值
+
+> 这种方式其实有弊端，只能返回某一种具体类型。当可选的返回多个类型时，编译会报错，因为实际的返回值类型，在编译到第一个返回分支时被确定了。
+> 可以用`特征对象`来实现这个能力
+
+```rust
+fn returns_summarizable() -> impl Summary {
+    ...
+}
 ```
 
 ## Validating References with Lifetimes
