@@ -1,16 +1,16 @@
 # Generic Types, Traits, Lifetime
 
 - [Generic Types, Traits, Lifetime](#generic-types-traits-lifetime)
-  - [Generic Types](#generic-types)
-    - [const generics(Rust 1.51)](#const-genericsrust-151)
-  - [Traits](#traits)
-    - [Trait Bound Syntax](#trait-bound-syntax)
-    - [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
-    - [有条件的实现特征](#有条件的实现特征)
-    - [特征用于指定函数返回值](#特征用于指定函数返回值)
-  - [Validating References with Lifetimes](#validating-references-with-lifetimes)
-    - [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
-    - [The Static Lifetime](#the-static-lifetime)
+	- [Generic Types](#generic-types)
+		- [const generics(Rust 1.51)](#const-genericsrust-151)
+	- [Traits](#traits)
+		- [Trait Bound Syntax](#trait-bound-syntax)
+		- [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
+		- [有条件的实现特征](#有条件的实现特征)
+		- [特征用于指定函数返回值](#特征用于指定函数返回值)
+	- [Validating References with Lifetimes](#validating-references-with-lifetimes)
+		- [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
+		- [The Static Lifetime](#the-static-lifetime)
 
 
 ## Generic Types
