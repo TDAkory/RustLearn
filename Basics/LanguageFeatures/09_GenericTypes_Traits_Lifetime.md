@@ -1,16 +1,24 @@
 # Generic Types, Traits, Lifetime
 
 - [Generic Types, Traits, Lifetime](#generic-types-traits-lifetime)
-	- [Generic Types](#generic-types)
-		- [const generics(Rust 1.51)](#const-genericsrust-151)
-	- [Traits](#traits)
-		- [Trait Bound Syntax](#trait-bound-syntax)
-		- [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
-		- [有条件的实现特征](#有条件的实现特征)
-		- [特征用于指定函数返回值](#特征用于指定函数返回值)
-	- [Validating References with Lifetimes](#validating-references-with-lifetimes)
-		- [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
-		- [The Static Lifetime](#the-static-lifetime)
+  - [Generic Types](#generic-types)
+    - [const generics(Rust 1.51)](#const-genericsrust-151)
+  - [Traits](#traits)
+    - [Trait Bound Syntax](#trait-bound-syntax)
+    - [Specifying Multiple Trait Bounds with the + Syntax](#specifying-multiple-trait-bounds-with-the--syntax)
+    - [有条件的实现特征](#有条件的实现特征)
+    - [特征用于指定函数返回值](#特征用于指定函数返回值)
+    - [特征对象](#特征对象)
+      - [特征对象的layout](#特征对象的layout)
+      - [特征对象的限制](#特征对象的限制)
+      - [关联类型](#关联类型)
+      - [默认泛型类型参数](#默认泛型类型参数)
+      - [同名方法的处理](#同名方法的处理)
+      - [特征定义中，也可以增加特征约束](#特征定义中也可以增加特征约束)
+      - [在外部类型上实现外部特征(newtype)](#在外部类型上实现外部特征newtype)
+  - [Validating References with Lifetimes](#validating-references-with-lifetimes)
+    - [Lifetime Annotations in Struct Definitions](#lifetime-annotations-in-struct-definitions)
+    - [The Static Lifetime](#the-static-lifetime)
 
 
 ## Generic Types
@@ -247,6 +255,234 @@ impl<T: Display> ToString for T {
 ```rust
 fn returns_summarizable() -> impl Summary {
     ...
+}
+```
+
+### 特征对象
+
+> 其实就是C++继承，也有vtable
+
+特征对象指向实现了特征的类型的实例，可以通过 `&` 引用或者 `Box<T>` 智能指针的方式来创建特征对象:
+
+* `draw1` 函数的参数是 `Box<dyn Draw>` 形式的特征对象，该特征对象是通过 `Box::new(x)` 的方式创建的
+* `draw2` 函数的参数是 `&dyn Draw` 形式的特征对象，该特征对象是通过 `&x` 的方式创建的
+* `dyn` 关键字只用在特征对象的类型声明上，在创建时无需使用 `dyn`
+
+```rust
+trait Draw {
+    fn draw(&self) -> String;
+}
+
+impl Draw for u8 {
+    fn draw(&self) -> String {
+        format!("u8: {}", *self)
+    }
+}
+
+impl Draw for f64 {
+    fn draw(&self) -> String {
+        format!("f64: {}", *self)
+    }
+}
+
+// 若 T 实现了 Draw 特征， 则调用该函数时传入的 Box<T> 可以被隐式转换成函数参数签名中的 Box<dyn Draw>
+fn draw1(x: Box<dyn Draw>) {
+    // 由于实现了 Deref 特征，Box 智能指针会自动解引用为它所包裹的值，然后调用该值对应的类型上定义的 `draw` 方法
+    x.draw();
+}
+
+fn draw2(x: &dyn Draw) {
+    x.draw();
+}
+
+fn main() {
+    let x = 1.1f64;
+    // do_something(&x);
+    let y = 8u8;
+
+    // x 和 y 的类型 T 都实现了 `Draw` 特征，因为 Box<T> 可以在函数调用时隐式地被转换为特征对象 Box<dyn Draw> 
+    // 基于 x 的值创建一个 Box<f64> 类型的智能指针，指针指向的数据被放置在了堆上
+    draw1(Box::new(x));
+    // 基于 y 的值创建一个 Box<u8> 类型的智能指针
+    draw1(Box::new(y));
+    draw2(&x);
+    draw2(&y);
+}
+```
+
+
+#### 特征对象的layout
+TODO 特征对象的layout
+
+简而言之，当类型 Button 实现了特征 Draw 时，类型 Button 的实例对象 btn 可以当作特征 Draw 的特征对象类型来使用，btn 中保存了作为特征对象的数据指针（指向类型 Button 的实例数据）和行为指针（指向 vtable）。
+
+一定要注意，此时的 btn 是 Draw 的特征对象的实例，而不再是具体类型 Button 的实例，而且 btn 的 vtable 只包含了实现自特征 Draw 的那些方法（比如 draw），因此 btn 只能调用实现于特征 Draw 的 draw 方法，而不能调用类型 Button 本身实现的方法和类型 Button 实现于其他特征的方法。也就是说，btn 是哪个特征对象的实例，它的 vtable 中就包含了该特征的方法。
+
+#### 特征对象的限制
+
+不是所有特征都能拥有特征对象，只有对象安全的特征才行。当一个特征的所有方法都有如下属性时，它的对象才是安全的：
+
+* 方法的返回类型不能是 Self
+* 方法没有任何泛型参数
+
+> self是函数参数，指代当前实例，Self指代类型
+
+#### 关联类型
+
+关联类型是在特征定义的语句块中，申明一个自定义类型，这样就可以在特征的方法签名中使用该类型：
+
+```rust
+pub trait Iterator {
+    type Item;
+
+    fn next(&mut self) -> Option<Self::Item>;
+}
+```
+
+关联类型主要是为了使代码更加可读，比如下面的对比案例：
+
+```rust
+trait Container<A,B> {
+    fn contains(&self,a: A,b: B) -> bool;
+}
+
+fn difference<A,B,C>(container: &C) -> i32
+  where
+    C : Container<A,B> {...}
+```
+
+```rust
+trait Container{
+    type A;
+    type B;
+    fn contains(&self, a: &Self::A, b: &Self::B) -> bool;
+}
+
+fn difference<C: Container>(container: &C) {}
+```
+
+#### 默认泛型类型参数
+
+> 等价于：C++模板的默认类型参数
+>
+> Rust 并不支持创建自定义运算符，你也无法为所有运算符进行重载，目前来说，只有定义在 std::ops 中的运算符才能进行重载
+
+```rust
+// 以标准库std::ops::Add为例
+trait Add<RHS=Self> {
+    type Output;
+
+    fn add(self, rhs: RHS) -> Self::Output;
+}
+```
+
+#### 同名方法的处理
+
+不同特征拥有同名的方法是很正常的事情，除此之外，类型上，也有同名方法
+
+```rust
+trait Pilot {
+    fn fly(&self);
+}
+
+trait Wizard {
+    fn fly(&self);
+}
+
+struct Human;
+
+impl Pilot for Human {
+    fn fly(&self) {
+        println!("This is your captain speaking.");
+    }
+}
+
+impl Wizard for Human {
+    fn fly(&self) {
+        println!("Up!");
+    }
+}
+
+impl Human {
+    fn fly(&self) {
+        println!("*waving arms furiously*");
+    }
+}
+```
+
+针对接收&self的方法，默认时会调用类型上的定义，传参情况下可以进行显式调用
+
+```rust
+fn main() {
+    let person = Human;
+    Pilot::fly(&person); // 调用Pilot特征上的方法
+    Wizard::fly(&person); // 调用Wizard特征上的方法
+    person.fly(); // 调用Human类型自身的方法
+}
+```
+
+针对不接收&self的关联函数，可以采用完全限定语法来指明调用类型`<Type as Trait>::function(receiver_if_method, next_arg, ...);`
+
+```rust
+trait Animal {
+    fn baby_name() -> String;
+}
+
+struct Dog;
+
+impl Dog {
+    fn baby_name() -> String {
+        String::from("Spot")
+    }
+}
+
+impl Animal for Dog {
+    fn baby_name() -> String {
+        String::from("puppy")
+    }
+}
+
+fn main() {
+    println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
+}
+```
+
+#### 特征定义中，也可以增加特征约束
+
+```rust
+use std::fmt::Display;
+
+// 想要实现 OutlinePrint 特征，首先你需要实现 Display 特征
+trait OutlinePrint: Display {
+    fn outline_print(&self) {
+        let output = self.to_string();
+        ...
+    }
+}
+```
+
+#### 在外部类型上实现外部特征(newtype)
+
+孤儿规则，简单来说，就是特征或者类型必需至少有一个是本地的，才能在此类型上定义特征。
+
+这里提供一个办法来绕过孤儿规则，那就是使用newtype 模式，简而言之：就是为一个元组结构体创建新类型。该元组结构体封装有一个字段，该字段就是希望实现特征的具体类型。
+
+该封装类型是本地的，因此我们可以为此类型实现外部的特征。
+
+```rust
+use std::fmt;
+
+struct Wrapper(Vec<String>);
+
+impl fmt::Display for Wrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}]", self.0.join(", "))
+    }
+}
+
+fn main() {
+    let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+    println!("w = {}", w);
 }
 ```
 
