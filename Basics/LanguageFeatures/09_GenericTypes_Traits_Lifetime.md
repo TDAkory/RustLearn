@@ -488,6 +488,10 @@ fn main() {
 
 ## Validating References with Lifetimes
 
+生命周期注解不会改变任何引用的存活时间。相反，它们描述多个引用的生命周期之间的关系，而不会影响这些生命周期。
+
+在函数签名中使用生命周期注解，我们需要在函数名和参数列表之间的尖括号内声明泛型的 “生命周期” 参数，就像我们对泛型 “类型” 参数所做的那样。
+
 ```rust
 &i32        // a reference
 &'a i32     // a reference with an explicit lifetime
