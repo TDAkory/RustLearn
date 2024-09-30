@@ -12,3 +12,5 @@
 
 - [Rust语言圣经(Rust Course)](https://course.rs/about-book.html)
 - [Rust By Practice](https://practice.course.rs/why-exercise.html)
+
+- [Rust 秘典（死灵书）](https://nomicon.purewhite.io/vec/vec-alloc.html)
