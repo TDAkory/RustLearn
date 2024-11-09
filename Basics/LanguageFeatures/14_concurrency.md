@@ -12,6 +12,9 @@ Because threads can run simultaneously, there’s no inherent guarantee about th
 
 ## std::thread
 
+* If main thread of a Rust program completes, all spawned threads are shut down, like C++
+* use `join` to wait for its thread to finish, the return type of `thread::spawn` is `JoinHandle`
+
 ```rust
 use std::thread;
 use std::time::Duration;

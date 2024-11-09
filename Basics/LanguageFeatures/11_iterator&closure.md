@@ -1,6 +1,6 @@
 # Iterators and Closures
 
-* Closures, a function-like construct you can store in a variable
+* Closures, a function-like construct you can store in a variable，类比C++中的lambda
 * Iterators, a way of processing a series of elements
 * How to use closures and iterators to improve the I/O project in Chapter 12
 * The performance of closures and iterators (Spoiler alert: they’re faster than you might think!)
