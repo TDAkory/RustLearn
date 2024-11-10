@@ -54,6 +54,8 @@ fn main() {
 
 ## Using Message Passing to Transfer Data Between Threads
 
+Rust’s standard library provides an implementation of channels. A channel is a general programming concept by which data is sent from one thread to another.
+
 ```rust
 // mpsc stands for multiple producer, single consumer.
 use std::sync::mpsc;
@@ -72,9 +74,9 @@ fn main() {
 }
 ```
 
-The receiver has two useful methods: recv and try_recv. We’re using recv, short for receive, which will block the main thread’s execution and wait until a value is sent down the channel. Once a value is sent, recv will return it in a Result<T, E>. When the transmitter closes, recv will return an error to signal that no more values will be coming.
+The receiver has two useful methods: `recv` and `try_recv`. We’re using `recv`, short for receive, which will block the main thread’s execution and wait until a value is sent down the channel. Once a value is sent, `recv` will return it in a `Result<T, E>`. When the transmitter closes, `recv` will return an error to signal that no more values will be coming.
 
-The try_recv method doesn’t block, but will instead return a Result<T, E> immediately: an Ok value holding a message if one is available and an Err value if there aren’t any messages this time. Using try_recv is useful if this thread has other work to do while waiting for messages: we could write a loop that calls try_recv every so often, handles a message if one is available, and otherwise does other work for a little while until checking again.
+The `try_recv` method doesn’t block, but will instead return a `Result<T, E>` immediately: an Ok value holding a message if one is available and an Err value if there aren’t any messages this time. Using `try_recv` is useful if this thread has other work to do while waiting for messages: we could write a loop that calls `try_recv` every so often, handles a message if one is available, and otherwise does other work for a little while until checking again.
 
 ### Ownership Transference
 
@@ -182,11 +184,15 @@ fn main() {
 
 ### Transfer ownership between threads with `Send`
 
+The Send marker trait indicates that ownership of values of the type implementing Send can be transferred between threads. 
+
 * Almost every Rust type is Send, but there are some exceptions, including `Rc<T>` 
   * avoid both threads might update the reference count at the same time
 * Almost all primitive types are Send, aside from raw pointers
 
 ### Access from multiple threads with `Sync`
+
+The Sync marker trait indicates that it is safe for the type implementing Sync to be referenced from multiple threads.
 
 * The Sync marker trait indicates that it is safe for the type implementing Sync to be referenced from multiple threads. 
 * any type T is Sync if &T (an immutable reference to T) is Send
@@ -194,3 +200,5 @@ fn main() {
 * types composed entirely of types that are Sync are also Sync
 
 ### Implementing Send and Sync manually is unsafe
+
+Because types that are made up of Send and Sync traits are automatically also Send and Sync, we don’t have to implement those traits manually. As marker traits, they don’t even have any methods to implement. They’re just useful for enforcing invariants related to concurrency.
