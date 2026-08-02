@@ -62,7 +62,7 @@ fn main() {
 
 ```shell
 cargo run
-   Compiling variables v0.1.0 (/Users/admin/WorkPlace/RustWorkshop/variables)
+   Compiling variables v0.1.0 (<workspace>/variables)
     Finished dev [unoptimized + debuginfo] target(s) in 2.06s
      Running `target/debug/variables`
 The value of x in the inner scope is: 12

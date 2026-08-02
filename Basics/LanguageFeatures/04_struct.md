@@ -22,20 +22,20 @@ struct User {
 }
 
     let user1 = User {
-        email: String::from("someone@example.com"),
+        email: String::from("<user-email>"),
         username: String::from("someusername123"),
         active: true,
         sign_in_count: 1,
     };
 
     let mut user1 = User {          // the entire instance must be mutable; Rust doesn’t allow us to mark only certain fields as mutable. 
-        email: String::from("someone@example.com"),
+        email: String::from("<user-email>"),
         username: String::from("someusername123"),
         active: true,
         sign_in_count: 1,
     };
 
-    user1.email = String::from("anotheremail@example.com");
+    user1.email = String::from("<updated-email>");
 
 fn build_user(email: String, username: String) -> User {
     User {
@@ -60,13 +60,13 @@ fn build_user(email: String, username: String) -> User {
     let user2 = User {
         active: user1.active,
         username: user1.username,
-        email: String::from("another@example.com"),
+        email: String::from("<another-email>"),
         sign_in_count: user1.sign_in_count,
     };
 
     // struct update syntax **Note that the struct update syntax is like assignment with = because it moves the data**
     let user2 = User {
-        email: String::from("another@example.com"),
+        email: String::from("<another-email>"),
         ..user1     // syntax .. specifies that the remaining fields not explicitly set should have the same value as the fields in the given instance
     };
 ```
